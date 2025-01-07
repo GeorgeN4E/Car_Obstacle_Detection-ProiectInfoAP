@@ -63,11 +63,12 @@ class Lane:
     # Four corners of the trapezoid-shaped region of interest
     # You need to find these corners manually.
     self.roi_points = np.float32([
-      (int(0.456*width),int(0.544*height)), # Top-left corner
-      (0, height-1), # Bottom-left corner			
-      (int(0.958*width),height-1), # Bottom-right corner
-      (int(0.6183*width),int(0.544*height)) # Top-right corner
+        (int(0.456*width), int(0.544*height)),  # Top-left
+        (0, height-1),                         # Bottom-left
+        (int(0.958*width), height-1),          # Bottom-right
+        (int(0.6183*width), int(0.544*height)) # Top-right
     ])
+
 		
     # The desired corner locations  of the region of interest
     # after we perform perspective transformation.
@@ -732,10 +733,6 @@ def main():
 			
       # Store the original frame
       original_frame = frame.copy()
-
-      plt.plot(left_fitx, self.ploty, color='yellow')
-      plt.plot(right_fitx, self.ploty, color='yellow')
-  
 
       # Create a Lane object
       lane_obj = Lane(orig_frame=original_frame)
