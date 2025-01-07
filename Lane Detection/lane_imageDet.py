@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt # Used for plotting and error checking
 # https://automaticaddison.com
 # Description: Implementation of the Lane class 
  
-filename = 'original_lane_detection_5.jpg'
+filename = 'original_lane_detection_1.jpg'
  
 class Lane:
   """

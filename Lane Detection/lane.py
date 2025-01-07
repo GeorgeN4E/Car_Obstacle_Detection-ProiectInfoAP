@@ -342,8 +342,8 @@ class Lane:
       right_line_pts = np.hstack((right_line_window1, right_line_window2))
 			
       # Draw the lane onto the warped blank image
-      cv2.fillPoly(window_img, np.int_([left_line_pts]), (0,255, 0))
-      cv2.fillPoly(window_img, np.int_([right_line_pts]), (0,255, 0))
+      cv2.fillPoly(window_img, int([left_line_pts]), (0,255, 0))
+      cv2.fillPoly(window_img, int([right_line_pts]), (0,255, 0))
       result = cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
       
       # Plot the figures 
@@ -374,7 +374,7 @@ class Lane:
     frame_sliding_window = self.warped_frame.copy()
 
     # Set the height of the sliding windows
-    window_height = np.int(self.warped_frame.shape[0]/self.no_of_windows)		
+    window_height = int(self.warped_frame.shape[0] / self.no_of_windows)		
 
     # Find the x and y coordinates of all the nonzero 
     # (i.e. white) pixels in the frame.	
@@ -424,9 +424,9 @@ class Lane:
       # If you found > minpix pixels, recenter next window on mean position
       minpix = self.minpix
       if len(good_left_inds) > minpix:
-        leftx_current = np.int(np.mean(nonzerox[good_left_inds]))
+        leftx_current = int(np.mean(nonzerox[good_left_inds]))
       if len(good_right_inds) > minpix:        
-        rightx_current = np.int(np.mean(nonzerox[good_right_inds]))
+        rightx_current = int(np.mean(nonzerox[good_right_inds]))
 					
     # Concatenate the arrays of indices
     left_lane_inds = np.concatenate(left_lane_inds)
@@ -581,7 +581,7 @@ class Lane:
     Return the x coordinate of the left histogram peak and the right histogram
     peak.
     """
-    midpoint = np.int(self.histogram.shape[0]/2)
+    midpoint = int(self.histogram.shape[0]/2)
     leftx_base = np.argmax(self.histogram[:midpoint])
     rightx_base = np.argmax(self.histogram[midpoint:]) + midpoint
 
@@ -606,7 +606,8 @@ class Lane:
     pts = np.hstack((pts_left, pts_right))
 		
     # Draw lane on the warped blank image
-    cv2.fillPoly(color_warp, np.int_([pts]), (0,255, 0))
+    cv2.fillPoly(color_warp, np.int32([pts]), (0, 255, 0))
+
 
     # Warp the blank back to original image space using inverse perspective 
     # matrix (Minv)
@@ -662,7 +663,7 @@ class Lane:
     # Display the perspective transformed (i.e. warped) frame
     if plot == True:
       warped_copy = self.warped_frame.copy()
-      warped_plot = cv2.polylines(warped_copy, np.int32([
+      warped_plot = cv2.polylines(warped_copy, int32([
                     self.desired_roi_points]), True, (147,20,255), 3)
 
       # Display the image
@@ -690,7 +691,7 @@ class Lane:
       frame = self.orig_frame.copy()
 
     # Overlay trapezoid on the frame
-    this_image = cv2.polylines(frame, np.int32([
+    this_image = cv2.polylines(frame, int32([
       self.roi_points]), True, (147,20,255), 3)
 
     # Display the image
@@ -731,6 +732,10 @@ def main():
 			
       # Store the original frame
       original_frame = frame.copy()
+
+      plt.plot(left_fitx, self.ploty, color='yellow')
+      plt.plot(right_fitx, self.ploty, color='yellow')
+  
 
       # Create a Lane object
       lane_obj = Lane(orig_frame=original_frame)
