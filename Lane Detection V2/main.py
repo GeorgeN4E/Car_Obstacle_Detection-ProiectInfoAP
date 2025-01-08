@@ -140,38 +140,35 @@ def draw_lane_lines(image, lines, color=[255, 0, 0], thickness=12):
     return cv2.addWeighted(image, 1.0, line_image, 1.0, 0.0)
 
 
+def adjust_parameters():
+    cv2.namedWindow("Adjustments")
+    cv2.createTrackbar("Low Threshold", "Adjustments", 50, 255, lambda x: None)
+    cv2.createTrackbar("High Threshold", "Adjustments", 150, 255, lambda x: None)
+
 def frame_processor(image):
-	"""
-	Process the input frame to detect lane lines.
-	Parameters:
-		image: image of a road where one wants to detect lane lines
-		(we will be passing frames of video to this function)
-	"""
-	# convert the RGB image to Gray scale
-	grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-	# applying gaussian Blur which removes noise from the image 
-	# and focuses on our region of interest
-	# size of gaussian kernel
-	kernel_size = 5
-	# Applying gaussian blur to remove noise from the frames
-	blur = cv2.GaussianBlur(grayscale, (kernel_size, kernel_size), 0)
-	# first threshold for the hysteresis procedure
-	low_t = 50
-	# second threshold for the hysteresis procedure 
-	high_t = 150
-	# applying canny edge detection and save edges in a variable
-	edges = cv2.Canny(blur, low_t, high_t)
-	# since we are getting too many edges from our image, we apply 
-	# a mask polygon to only focus on the road
-	# Will explain Region selection in detail in further steps
-	region = region_selection(edges)
-	# Applying hough transform to get straight lines from our image 
-	# and find the lane lines
-	# Will explain Hough Transform in detail in further steps
-	hough = hough_transform(region)
-	#lastly we draw the lines on our resulting frame and return it as output 
-	result = draw_lane_lines(image, lane_lines(image, hough))
-	return result
+    adjust_parameters()  # Initialize sliders
+
+    while True:
+        # Get current slider positions
+        low_t = cv2.getTrackbarPos("Low Threshold", "Adjustments")
+        high_t = cv2.getTrackbarPos("High Threshold", "Adjustments")
+
+        # Process frame with current parameters
+        grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        blur = cv2.GaussianBlur(grayscale, (5, 5), 0)
+        edges = cv2.Canny(blur, low_t, high_t)
+
+        # Display edges in a smaller window
+        cv2.namedWindow("Edges", cv2.WINDOW_NORMAL)  # Create resizable window
+        cv2.resizeWindow("Edges", 640, 480)  # Set size to 640x480 pixels
+        cv2.imshow("Edges", edges)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):  # Exit loop when 'q' is pressed
+            break
+
+    return edges  # Return the processed frame
+
+
 
 # driver function
 import cv2
