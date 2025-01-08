@@ -63,11 +63,12 @@ class Lane:
     # Four corners of the trapezoid-shaped region of interest
     # You need to find these corners manually.
     self.roi_points = np.float32([
-        (int(0.456*width), int(0.544*height)),  # Top-left
-        (0, height-1),                         # Bottom-left
-        (int(0.958*width), height-1),          # Bottom-right
-        (int(0.6183*width), int(0.544*height)) # Top-right
+        (int(0.45 * width), int(0.6 * height)),  # Top-left
+        (int(0.1 * width), height - 1),         # Bottom-left
+        (int(0.9 * width), height - 1),         # Bottom-right
+        (int(0.55 * width), int(0.6 * height))  # Top-right
     ])
+
 
 		
     # The desired corner locations  of the region of interest
@@ -86,9 +87,9 @@ class Lane:
     self.histogram = None
 		
     # Sliding window parameters
-    self.no_of_windows = 10
-    self.margin = int((1/12) * width)  # Window width is +/- margin
-    self.minpix = int((1/24) * width)  # Min no. of pixels to recenter window
+    self.no_of_windows = 12
+    self.margin = int((1/15) * width)  # Window width is +/- margin
+    self.minpix = int((1/30) * width)  # Min no. of pixels to recenter window
 		
     # Best fit polynomial lines for left line and right line of the lane
     self.left_fit = None
@@ -540,7 +541,9 @@ class Lane:
 		
     # 1s will be in the cells with the highest Sobel derivative values
     # (i.e. strongest lane line edges)
-    sxbinary = edge.mag_thresh(sxbinary, sobel_kernel=3, thresh=(110, 255))
+    # Sobel thresholding
+    sxbinary = edge.mag_thresh(sxbinary, sobel_kernel=3, thresh=(30, 100))
+  
 
     ######################## Isolate possible lane lines ######################
   
@@ -552,7 +555,7 @@ class Lane:
     # White in the regions with the purest hue colors (e.g. >130...play with
     # this value for best results).
     s_channel = hls[:, :, 2] # use only the saturation channel data
-    _, s_binary = edge.threshold(s_channel, (130, 255))
+    _, s_binary = edge.threshold(s_channel, thresh=(100, 255))
 	
     # Perform binary thresholding on the R (red) channel of the 
 		# original BGR video frame. 
@@ -560,7 +563,7 @@ class Lane:
     # White in the regions with the richest red channel values (e.g. >120).
     # Remember, pure white is bgr(255, 255, 255).
     # Pure yellow is bgr(0, 255, 255). Both have high red channel values.
-    _, r_thresh = edge.threshold(frame[:, :, 2], thresh=(120, 255))
+    _, r_thresh = edge.threshold(frame[:, :, 2], thresh=(150, 255))
 
     # Lane lines should be pure in color and have high red channel values 
     # Bitwise AND operation to reduce noise and black-out any pixels that
@@ -617,7 +620,8 @@ class Lane:
                                   1], self.orig_frame.shape[0]))
     
     # Combine the result with the original image
-    result = cv2.addWeighted(self.orig_frame, 1, newwarp, 0.3, 0)
+    result = cv2.addWeighted(self.orig_frame, 1, newwarp, 0.6, 0)  # Opacity = 0.6
+
 		
     if plot==True:
      
@@ -722,7 +726,7 @@ def main():
 		
     # Capture one frame at a time
     success, frame = cap.read() 
-		
+
     # Do we have a video frame? If true, proceed.
     if success:
 		
