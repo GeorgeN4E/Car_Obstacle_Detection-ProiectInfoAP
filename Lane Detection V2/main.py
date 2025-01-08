@@ -1,9 +1,10 @@
-import numpy as np
 import cv2
-from moviepy.video.io.VideoFileClip import VideoFileClip
+import numpy as np
 
-# Region of Interest Selection
 def region_selection(image):
+    """
+    Define a region of interest for lane detection.
+    """
     rows, cols = image.shape[:2]
     bottom_left = [cols * 0.2, rows * 0.95]
     top_left = [cols * 0.4, rows * 0.6]
@@ -15,17 +16,16 @@ def region_selection(image):
     cv2.fillPoly(mask, vertices, ignore_mask_color)
     return cv2.bitwise_and(image, mask)
 
-# Hough Transform
-def hough_transform(image):
-    rho = 1
-    theta = np.pi / 180
-    threshold = cv2.getTrackbarPos("Hough Threshold", "Adjustments")
-    minLineLength = cv2.getTrackbarPos("Min Line Length", "Adjustments")
-    maxLineGap = cv2.getTrackbarPos("Max Line Gap", "Adjustments")
-    return cv2.HoughLinesP(image, rho, theta, threshold, minLineLength=minLineLength, maxLineGap=maxLineGap)
+def hough_transform(image, rho, theta, threshold, min_line_length, max_line_gap):
+    """
+    Perform Hough Transform to detect lines.
+    """
+    return cv2.HoughLinesP(image, rho, theta, threshold, minLineLength=min_line_length, maxLineGap=max_line_gap)
 
-# Line Averaging and Filtering
 def average_slope_intercept(lines, image_width):
+    """
+    Compute averaged slope and intercept for left and right lanes.
+    """
     left_lines = []
     left_weights = []
     right_lines = []
@@ -48,8 +48,10 @@ def average_slope_intercept(lines, image_width):
     right_lane = np.dot(right_weights, right_lines) / np.sum(right_weights) if right_weights else None
     return left_lane, right_lane
 
-# Convert Slope/Intercept to Points
 def pixel_points(y1, y2, line):
+    """
+    Convert line slope and intercept to pixel points.
+    """
     if line is None:
         return None
     slope, intercept = line
@@ -57,8 +59,10 @@ def pixel_points(y1, y2, line):
     x2 = int((y2 - intercept) / slope)
     return (x1, int(y1)), (x2, int(y2))
 
-# Draw Lane Lines
 def draw_lane_lines(image, lines):
+    """
+    Draw lane lines on the image.
+    """
     line_image = np.zeros_like(image)
     for line in lines:
         if line is not None:
@@ -66,85 +70,78 @@ def draw_lane_lines(image, lines):
             cv2.line(line_image, pt1, pt2, (255, 0, 0), 12)
     return cv2.addWeighted(image, 1.0, line_image, 1.0, 0.0)
 
-# Adjustments for Debugging
-def adjust_parameters():
-	#Try to close the "Adjustments" window if it exists
-    try:
-        cv2.destroyWindow("Adjustments")
-    except cv2.error:
-        pass  # Ignore if the window doesn't exist
-    # Create a new adjustments window with specified size
-    cv2.namedWindow("Adjustments", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("Adjustments", 400, 300)  # Set slider window size
-    cv2.createTrackbar("Low Threshold", "Adjustments", 50, 600, lambda x: None)
-    cv2.createTrackbar("High Threshold", "Adjustments", 150, 600, lambda x: None)
-    cv2.createTrackbar("Hough Threshold", "Adjustments", 20, 100, lambda x: None)
-    cv2.createTrackbar("Min Line Length", "Adjustments", 20, 100, lambda x: None)
-    cv2.createTrackbar("Max Line Gap", "Adjustments", 50, 200, lambda x: None)
-
-
-# Frame Processing
-def frame_processor(image):
-    adjust_parameters()  # Initialize sliders
-
-    while True:
-        # Get current slider positions
-        low_t = cv2.getTrackbarPos("Low Threshold", "Adjustments")
-        high_t = cv2.getTrackbarPos("High Threshold", "Adjustments")
-        
-        # Process frame
-        grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        blur = cv2.GaussianBlur(grayscale, (5, 5), 0)
-        edges = cv2.Canny(blur, low_t, high_t)
-        
-        # Region selection and Hough Transform
-        region = region_selection(edges)
-        lines = hough_transform(region)
-        
-        # Process detected lines
-        if lines is not None:
-            left_lane, right_lane = average_slope_intercept(lines, image.shape[1])
-            lane_lines_points = [
-                pixel_points(image.shape[0], image.shape[0] * 0.6, left_lane),
-                pixel_points(image.shape[0], image.shape[0] * 0.6, right_lane)
-            ]
-            result = draw_lane_lines(image, lane_lines_points)
-        else:
-            result = image
-
-        # Resize and display windows
-        cv2.namedWindow("Edges", cv2.WINDOW_NORMAL)
-        cv2.resizeWindow("Edges", 640, 480)  # Set window size
-        cv2.imshow("Edges", edges)
-
-        cv2.namedWindow("Result", cv2.WINDOW_NORMAL)
-        cv2.resizeWindow("Result", 800, 600)  # Set window size
-        cv2.imshow("Result", result)
-
-        # Exit loop on 'q'
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
+def process_frame(frame, low_t, high_t, rho, theta, threshold, min_line_length, max_line_gap):
+    """
+    Process a single frame with the given parameters.
+    """
+    grayscale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    blur = cv2.GaussianBlur(grayscale, (5, 5), 0)
+    edges = cv2.Canny(blur, low_t, high_t)
+    region = region_selection(edges)
+    lines = hough_transform(region, rho, theta, threshold, min_line_length, max_line_gap)
+    if lines is not None:
+        left_lane, right_lane = average_slope_intercept(lines, frame.shape[1])
+        lane_lines_points = [
+            pixel_points(frame.shape[0], frame.shape[0] * 0.6, left_lane),
+            pixel_points(frame.shape[0], frame.shape[0] * 0.6, right_lane)
+        ]
+        result = draw_lane_lines(frame, lane_lines_points)
+    else:
+        result = frame
     return result
 
-
-# Process Video
-def process_video_opencv(input_path, output_path):
+def process_video(input_path, output_path, low_t, high_t, hough_params):
+    """
+    Process the entire video using specified parameters.
+    """
     cap = cv2.VideoCapture(input_path)
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
-        processed_frame = frame_processor(frame)
+        processed_frame = process_frame(frame, low_t, high_t, *hough_params)
         out.write(processed_frame)
+
     cap.release()
     out.release()
     cv2.destroyAllWindows()
 
-# Call the Function
-process_video_opencv('input.mp4', 'output.mp4')
+if __name__ == "__main__":
+    # Input parameters
+    input_video = "input.mp4"
+    output_video = "output.mp4"
+
+    """Default Params    
+    # Canny edge detection thresholds
+    low_threshold = 50
+    high_threshold = 150
+
+    # Hough transform parameters
+    rho = 1
+    theta = np.pi / 180
+    hough_threshold = 20
+    min_line_length = 40
+    max_line_gap = 150
+    """
+
+    # Canny edge detection thresholds
+    low_threshold = 230
+    high_threshold = 415
+
+    # Hough transform parameters
+    rho = 1
+    theta = np.pi / 180
+    hough_threshold = 15
+    min_line_length = 50
+    max_line_gap = 200
+
+
+    # Process video
+    hough_params = (rho, theta, hough_threshold, min_line_length, max_line_gap)
+    process_video(input_video, output_video, low_threshold, high_threshold, hough_params)
