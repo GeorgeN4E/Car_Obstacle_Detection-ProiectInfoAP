@@ -81,6 +81,32 @@ def adjust_parameters():
     cv2.createTrackbar("Hough Threshold", "Adjustments", 20, 100, lambda x: None)
     cv2.createTrackbar("Min Line Length", "Adjustments", 20, 100, lambda x: None)
     cv2.createTrackbar("Max Line Gap", "Adjustments", 50, 200, lambda x: None)
+    cv2.createTrackbar("Exclude Left", "Adjustments", 0, 50, lambda x: None)  # Left exclusion (0-50%)
+    cv2.createTrackbar("Exclude Right", "Adjustments", 0, 50, lambda x: None)  # Right exclusion (0-50%)
+
+
+
+	# Canny edge detection thresholds
+    low_threshold = 447
+    high_threshold = 151
+
+    # Hough transform parameters
+    rho = 1
+    theta = np.pi / 180
+    hough_threshold = 5
+    min_line_length = 13
+    max_line_gap = 0
+    exclude_left = 32
+    exclude_right = 25
+
+    # Explicitly set the default values
+    cv2.setTrackbarPos("Low Threshold", "Adjustments", low_threshold)
+    cv2.setTrackbarPos("High Threshold", "Adjustments", high_threshold)
+    cv2.setTrackbarPos("Hough Threshold", "Adjustments", hough_threshold)
+    cv2.setTrackbarPos("Min Line Length", "Adjustments", min_line_length)
+    cv2.setTrackbarPos("Max Line Gap", "Adjustments", max_line_gap)
+    cv2.setTrackbarPos("Exclude Left", "Adjustments", exclude_left)  # Left exclusion (0-50%)
+    cv2.setTrackbarPos("Exclude Right", "Adjustments", exclude_right)  # Right exclusion (0-50%)
 
 
 # Frame Processing
@@ -91,16 +117,31 @@ def frame_processor(image):
         # Get current slider positions
         low_t = cv2.getTrackbarPos("Low Threshold", "Adjustments")
         high_t = cv2.getTrackbarPos("High Threshold", "Adjustments")
-        
+        exclude_left_percent = cv2.getTrackbarPos("Exclude Left", "Adjustments")  # Left exclusion
+        exclude_right_percent = cv2.getTrackbarPos("Exclude Right", "Adjustments")  # Right exclusion
+
+        # Convert percentage to pixel values
+        exclude_left_x = int(image.shape[1] * exclude_left_percent / 100)
+        exclude_right_x = int(image.shape[1] * (1 - exclude_right_percent / 100))
+
         # Process frame
         grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         blur = cv2.GaussianBlur(grayscale, (5, 5), 0)
         edges = cv2.Canny(blur, low_t, high_t)
-        
+
+        # Exclude the parts of the screen on the left and right
+        edges[:, :exclude_left_x] = 0  # Mask the left region
+        edges[:, exclude_right_x:] = 0  # Mask the right region
+
+        # Visualize the exclusion lines
+        image_with_lines = image.copy()
+        cv2.line(image_with_lines, (exclude_left_x, 0), (exclude_left_x, image.shape[0]), (0, 255, 0), 2)  # Left line
+        cv2.line(image_with_lines, (exclude_right_x, 0), (exclude_right_x, image.shape[0]), (255, 0, 0), 2)  # Right line
+
         # Region selection and Hough Transform
         region = region_selection(edges)
         lines = hough_transform(region)
-        
+
         # Process detected lines
         if lines is not None:
             left_lane, right_lane = average_slope_intercept(lines, image.shape[1])
@@ -108,9 +149,9 @@ def frame_processor(image):
                 pixel_points(image.shape[0], image.shape[0] * 0.6, left_lane),
                 pixel_points(image.shape[0], image.shape[0] * 0.6, right_lane)
             ]
-            result = draw_lane_lines(image, lane_lines_points)
+            result = draw_lane_lines(image_with_lines, lane_lines_points)
         else:
-            result = image
+            result = image_with_lines
 
         # Resize and display windows
         cv2.namedWindow("Edges", cv2.WINDOW_NORMAL)
@@ -127,9 +168,10 @@ def frame_processor(image):
 
     return result
 
-
 # Process Video
 def process_video_opencv(input_path, output_path):
+	# Dynamically create a descriptive filename
+
     cap = cv2.VideoCapture(input_path)
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     fps = int(cap.get(cv2.CAP_PROP_FPS))

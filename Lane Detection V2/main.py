@@ -71,35 +71,77 @@ def draw_lane_lines(image, lines):
     return cv2.addWeighted(image, 1.0, line_image, 1.0, 0.0)
 
 def process_frame(frame, low_t, high_t, rho, theta, threshold, min_line_length, max_line_gap):
-    """
-    Process a single frame with the given parameters.
-    """
+    # Get exclusion line position (slider value in percentage)
+    exclude_line_percent = cv2.getTrackbarPos("Exclude Line", "Adjustments")
+    exclude_line_y = int(frame.shape[0] * exclude_line_percent / 100)
+
+    # Convert frame to grayscale and blur
     grayscale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(grayscale, (5, 5), 0)
+
+    # Canny edge detection
     edges = cv2.Canny(blur, low_t, high_t)
+
+    # Exclude the part of the screen below the exclusion line
+    edges[:exclude_line_y, :] = 0  # Mask the excluded region
+
+    # Draw the exclusion line for visualization
+    frame_with_line = frame.copy()
+    cv2.line(frame_with_line, (0, exclude_line_y), (frame.shape[1], exclude_line_y), (0, 255, 0), 2)
+
+    # Apply region selection
     region = region_selection(edges)
+
+    # Perform Hough Transform
     lines = hough_transform(region, rho, theta, threshold, min_line_length, max_line_gap)
+
     if lines is not None:
         left_lane, right_lane = average_slope_intercept(lines, frame.shape[1])
         lane_lines_points = [
             pixel_points(frame.shape[0], frame.shape[0] * 0.6, left_lane),
             pixel_points(frame.shape[0], frame.shape[0] * 0.6, right_lane)
         ]
-        result = draw_lane_lines(frame, lane_lines_points)
+        result = draw_lane_lines(frame_with_line, lane_lines_points)
     else:
-        result = frame
+        result = frame_with_line
+
     return result
+
 
 def process_video(input_path, output_path, low_t, high_t, hough_params):
     """
-    Process the entire video using specified parameters.
+    Process the entire video using specified parameters and save the output file.
+    The output filename is dynamically generated based on the parameters.
     """
+    # Dynamically create a descriptive filename
+    output_file = (
+        f"{output_path.rstrip('.mp4')}_"
+        f"low{low_t}_high{high_t}_"
+        f"hough{hough_params[2]}_"
+        f"minLen{hough_params[3]}_"
+        f"maxGap{hough_params[4]}.mp4"
+    )
+
+"""
+    output_file = (
+        f"{output_path.rstrip('.mp4')}_"
+        f"low{low_t}_high{high_t}_"
+        f"hough{hough_params[2]}_"
+        f"minLen{hough_params[3]}_"
+        f"maxGap{hough_params[4]}_"
+        f"exclude_left{hough_params[5]}_"
+        f"exclude_right{hough_params[6]}.mp4"
+    )
+"""
+
+
+    # Initialize video processing
     cap = cv2.VideoCapture(input_path)
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+    out = cv2.VideoWriter(output_file, fourcc, fps, (width, height))
 
     while cap.isOpened():
         ret, frame = cap.read()
@@ -112,10 +154,13 @@ def process_video(input_path, output_path, low_t, high_t, hough_params):
     out.release()
     cv2.destroyAllWindows()
 
+    print(f"Video processed and saved as: {output_file}")
+
+
 if __name__ == "__main__":
     # Input parameters
     input_video = "input.mp4"
-    output_video = "output.mp4"
+    output_video = "videos\\output.mp4"
 
     """Default Params    
     # Canny edge detection thresholds
@@ -131,15 +176,15 @@ if __name__ == "__main__":
     """
 
     # Canny edge detection thresholds
-    low_threshold = 230
+    low_threshold = 450
     high_threshold = 415
 
     # Hough transform parameters
     rho = 1
     theta = np.pi / 180
-    hough_threshold = 15
-    min_line_length = 50
-    max_line_gap = 200
+    hough_threshold = 19
+    min_line_length = 23
+    max_line_gap = 4
 
 
     # Process video
