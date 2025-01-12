@@ -38,19 +38,22 @@ Crearea unui sistem compact și portabil pentru monitorizarea drumurilor, capabi
 - Testare hardware utilizând comenzi de bază în Raspberry Pi (e.g., verificarea funcționării camerei cu `raspistill`).
 
 ### **Funcționalități implementate**
-1. **Detectarea obiectelor** (`road_detection.py`):
+1. **Detectarea obiectelor** (`lane detection`):
    - Algoritm YOLO v8 pentru recunoaștere de obiecte.
    - Procesare video și salvare cu adnotări.
-2. **Streaming video live** (`stream.py`):
+2. **Streaming video live** (`sender.py`):
    - Server Flask pentru transmiterea imaginilor capturate.
    - Configurare pentru accesarea fluxului video prin rețea locală.
+3. **Detectare și salvare locala a imaginilor** ('reciever.py')
+   - Algoritm YOLO v8 pentru recunoaștere de obiecte.
+   - Procesare imaginilor in timp real și salvarea cu adnotări.
 
 ---
 
 ## **Instalare și configurare pe Raspberry Pi**
 Pentru a utiliza scriptul **`sender.py`**, urmați pașii de mai jos pentru instalarea și configurarea Raspberry Pi Zero 2W. **Este obligatoriu să utilizați sistemul de operare `RASPBERRY PI OS LEGACY Bullseye`.**
 
-### **Pași de instalare**
+### **Pași de instalare pentru partea streaming de pe Raspberry PI**
 1. Instalați sistemul de operare **`RASPBERRY PI OS LEGACY Bullseye`** pe cardul SD utilizând unelte precum Raspberry Pi Imager.
 
 2. Actualizați pachetele și sistemul:
@@ -84,6 +87,32 @@ Pentru a utiliza scriptul **`sender.py`**, urmați pașii de mai jos pentru inst
    libcamera-hello --list-cameras
    ```
    - Această comandă ar trebui să detecteze camera conectată.
+
+### **Pași de instalare pentru partea clientului**
+Pentru a utiliza scriptul de detectare cu YOLO v8, urmați pașii de mai jos:
+
+1. **Crearea unui mediu virtual Conda**:
+   ```bash
+   conda create -n myenv python=3.8
+   ```
+
+2. **Activarea mediului virtual și instalarea dependențelor**:
+   ```bash
+   conda activate myenv
+   pip install ultralyticsplus==0.0.23 ultralytics==8.0.21
+   ```
+
+3. **Rularea scriptului**:
+   Executați scriptul folosind comanda:
+   ```bash
+   python reciever.py
+   ```
+
+Acest script va detecta obiectele în imaginea specificată și va afișa rezultatele vizual.
+
+---
+
+
 
 ### **Pași de utilizare**
 1. Asigurați-vă că toate conexiunile sunt corecte și componentele sunt bine instalate.
@@ -128,10 +157,16 @@ Dacă în timpul utilizării camera nu este detectată sau apar alte probleme, u
 ---
 
 ## **Bibliografie**
+
 1. Documentația YOLO v8: [https://docs.ultralytics.com](https://docs.ultralytics.com)  
 2. Ghid oficial Raspberry Pi: [https://www.raspberrypi.org](https://www.raspberrypi.org)  
 3. Flask Documentation: [https://flask.palletsprojects.com](https://flask.palletsprojects.com)  
-4. Adafruit Camera Troubleshooting: [https://forums.adafruit.com/viewtopic.php?t=206375](https://forums.adafruit.com/viewtopic.php?t=206375)
+4. Adafruit Camera Troubleshooting: [https://forums.adafruit.com/viewtopic.php?t=206375](https://forums.adafruit.com/viewtopic.php?t=206375)  
+5. Raspberry Pi Camera Guide: [https://raspberrytips.com/picamera2-raspberry-pi/](https://raspberrytips.com/picamera2-raspberry-pi/)  
+6. Headless Raspberry Pi Setup: [https://electronicshacks.com/how-to-set-up-a-headless-raspberry-pi/#:~:text=Headless%20Raspberry%20Pi%20Setup%3A%201%201.%20Download%20the,remotely%20connected%20to%20your%20headless%20Raspberry%20Pi%21%20](https://electronicshacks.com/how-to-set-up-a-headless-raspberry-pi/#:~:text=Headless%20Raspberry%20Pi%20Setup%3A%201%201.%20Download%20the,remotely%20connected%20to%20your%20headless%20Raspberry%20Pi%21%20)  
+7. Picamera2 Streaming with Python: [https://stackoverflow.com/questions/74131698/how-to-stream-a-capture-video-using-picamera2](https://stackoverflow.com/questions/74131698/how-to-stream-a-capture-video-using-picamera2)  
+8. GStreamer Downloads: [https://gstreamer.freedesktop.org/download/#windows](https://gstreamer.freedesktop.org/download/#windows)
+
 
 ---
 
