@@ -29,3 +29,4 @@ while True:
 
 cap.release()
 cv2.destroyAllWindows()
+ffmpeg -i udp://192.168.168.110:9000 -f sdl "Stream Output"

@@ -1,3 +1,5 @@
+#conda activate myenv
+
 from ultralyticsplus import YOLO, render_result
 
 # Load model
