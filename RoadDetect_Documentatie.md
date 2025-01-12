@@ -25,7 +25,7 @@ Crearea unui sistem compact și portabil pentru monitorizarea drumurilor, capabi
   - Rezoluție: 12MP
   - Unghi: 120°
 - **Baterie Li-Ion reîncărcabilă**: 
-  - Capacitate: 5000mAh
+  - Capacitate: 2300mAh
   - Tensiune: 3.7V
 
 ### **Diagrama de conectare**
