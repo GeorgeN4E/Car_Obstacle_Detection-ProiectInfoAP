@@ -29,7 +29,7 @@ Crearea unui sistem compact și portabil pentru monitorizarea drumurilor, capabi
 
 ### **Diagrama de conectare**
 - Raspberry Pi conectat la cameră ultrawide.
-- Baterie conectată la Raspberry Pi printr-un modul de încărcare (TP4056).
+- Baterie conectată la Raspberry Pi printr-un cablu usb/micro-usb.
 
 ---
 
@@ -93,6 +93,8 @@ Pentru a utiliza scriptul **`sender.py`**, urmați pașii de mai jos pentru inst
    ```
 
 3. Odată pornit, dispozitivul va transmite fluxul video pe adresa **`udp://<IP>:9000`**.
+
+4. După aceea, se poate rula scriptul **`reciever.py`** pentru a detecta in timp real obiecte
 
 ---
 
