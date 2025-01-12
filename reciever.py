@@ -1,35 +1,9 @@
-<<<<<<< Updated upstream
-import gi
-gi.require_version('Gst', '1.0')
-from gi.repository import Gst, GLib
 
-def main():
-    # Initialize GStreamer
-    Gst.init(None)
-
-    # Create the pipeline
-    pipeline = Gst.parse_launch(
-        "udpsrc port=9000 caps=application/x-rtp,media=video,clock-rate=90000,encoding-name=H264 ! "
-        "rtph264depay ! avdec_h264 ! videoconvert ! autovideosink"
-    )
-
-    # Start playing
-    pipeline.set_state(Gst.State.PLAYING)
-
-    # Run the main loop
-    loop = GLib.MainLoop()
-    try:
-        loop.run()
-    except KeyboardInterrupt:
-        print("Exiting...")
-
-    # Stop the pipeline
-   
-=======
 import socket
 import struct
 import pickle
 import cv2  # For displaying received frames
+
 
 def receive_frames(server_ip, server_port):
     print(f"Connecting to {server_ip}:{server_port}...")
@@ -85,4 +59,3 @@ if __name__ == "__main__":
     SERVER_IP = "192.168.137.236"  # Replace with your Raspberry Pi's IP
     SERVER_PORT = 9999
     receive_frames(SERVER_IP, SERVER_PORT)
->>>>>>> Stashed changes
