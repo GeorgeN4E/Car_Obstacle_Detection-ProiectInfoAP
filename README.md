@@ -134,7 +134,6 @@ Dacă în timpul utilizării camera nu este detectată sau apar alte probleme, u
 ---
 
 ## **Date de contact**
-Nume: [Numele tău]  
-E-mail: [adresa ta de e-mail]  
-Telefon: [numărul tău de telefon]
+Nume: [Radu George]  
+E-mail: [george-i.radu@student.unitbv.ro]
 
