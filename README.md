@@ -14,7 +14,12 @@ Crearea unui sistem compact și portabil pentru monitorizarea drumurilor, capabi
 3. **Portabilitate**: Alimentare cu baterie Li-Ion, compatibilitate cu dispozitive compacte (Raspberry Pi Zero 2W).
 
 ---
-[📹 Vezi demo video](https://github.com/user-attachments/assets/30d84626-5b1b-4215-9f1c-85eafe2ef5f7)
+## **Demo**
+**Click For Video**
+
+[![Demo Video](https://i.vimeocdn.com/video/1993758793-bd3f01c9706321f37ced4e42b1fab4e2ff70707435f2a20766bf6e8f5942ab2e-d_640x360?)](https://vimeo.com/1066114185)
+
+[![Demo Video](https://i.vimeocdn.com/video/1993758777-dbb6d2a05d698e18368ba6e410819858c696fbe8adafd8131c123d0bf3bdbedf-d_640x360?)](https://vimeo.com/1066114141)
 
 ---
 
