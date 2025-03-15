@@ -15,11 +15,17 @@ Crearea unui sistem compact și portabil pentru monitorizarea drumurilor, capabi
 
 ---
 ## **Demo**
-**Click For Video**
+**Click below on thumbnail to play demo**
 
 [![Demo Video](https://i.vimeocdn.com/video/1993758793-bd3f01c9706321f37ced4e42b1fab4e2ff70707435f2a20766bf6e8f5942ab2e-d_640x360?)](https://vimeo.com/1066114185)
 
+Short Video
+
+****
+
 [![Demo Video](https://i.vimeocdn.com/video/1993758777-dbb6d2a05d698e18368ba6e410819858c696fbe8adafd8131c123d0bf3bdbedf-d_640x360?)](https://vimeo.com/1066114141)
+
+Long Video
 
 ---
 
